@@ -4,7 +4,9 @@
 #include "treeland.h"
 
 #include "core/qmlengine.h"
+#ifndef DISABLE_DDM
 #include "greeter/usermodel.h"
+#endif
 #include "interfaces/multitaskviewinterface.h"
 #include "interfaces/plugininterface.h"
 #include "seat/helper.h"
@@ -424,6 +426,7 @@ bool Treeland::ActivateWayland(QDBusUnixFileDescriptor _fd)
 
     socket->create(fd->fileDescriptor(), false);
 
+#ifndef DISABLE_DDM
     auto userModel =
         d->helper->qmlEngine()->singletonInstance<UserModel *>("Treeland", "UserModel");
     if (auto u = userModel->getUser(user)) {
@@ -431,6 +434,7 @@ bool Treeland::ActivateWayland(QDBusUnixFileDescriptor _fd)
     }
 
     socket->setEnabled(userModel->currentUserName() == user);
+#endif
 
     d->helper->addSocket(socket.get());
 
@@ -439,10 +443,16 @@ bool Treeland::ActivateWayland(QDBusUnixFileDescriptor _fd)
     connect(connection().interface(),
             &QDBusConnectionInterface::serviceUnregistered,
             socket.get(),
+#ifndef DISABLE_DDM
             [user, userModel, d] {
                 userModel->getUser(user)->setWaylandSocket(nullptr);
                 d->userDisplayFds.remove(user);
             });
+#else
+            [user, d] {
+                d->userDisplayFds.remove(user);
+            });
+#endif
 
     return true;
 }

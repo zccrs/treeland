@@ -1,2 +1,4 @@
 add_subdirectory(multitaskview)
-add_subdirectory(lockscreen)
+if (NOT DISABLE_DDM)
+    add_subdirectory(lockscreen)
+endif()

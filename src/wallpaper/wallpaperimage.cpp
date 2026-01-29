@@ -6,7 +6,9 @@
 #include "core/qmlengine.h"
 #include "seat/helper.h"
 #include "modules/personalization/personalizationmanager.h"
+#ifndef DISABLE_DDM
 #include "greeter/usermodel.h"
+#endif
 #include "wallpapermanager.h"
 #include "workspace/workspacemodel.h"
 #include <woutputitem.h>
@@ -21,11 +23,13 @@ WAYLIB_SERVER_USE_NAMESPACE
 WallpaperImage::WallpaperImage(QQuickItem *parent)
     : QQuickAnimatedImage(parent)
 {
+#ifndef DISABLE_DDM
     connect(Helper::instance()->qmlEngine()->singletonInstance<UserModel *>("Treeland",
                                                                             "UserModel"),
             &UserModel::currentUserNameChanged,
             this,
             &WallpaperImage::updateSource);
+#endif
 
     connect(Helper::instance()->personalization(),
             &PersonalizationV1::backgroundChanged,

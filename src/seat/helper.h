@@ -102,10 +102,12 @@ class treeland_window_picker_v1;
 class IMultitaskView;
 class LockScreenInterface;
 class ILockScreen;
+#ifndef DISABLE_DDM
 class UserModel;
+class DDMInterfaceV1;
+#endif
 class OutputConfigState;
 class OutputLifecycleManager;
-class DDMInterfaceV1;
 class TreelandConfig;
 class TreelandUserConfig;
 class FpsDisplayManager;
@@ -247,8 +249,10 @@ public:
 
     Output* getOutputAtCursor() const;
 
+#ifndef DISABLE_DDM
     UserModel *userModel() const;
     DDMInterfaceV1 *ddmInterfaceV1() const;
+#endif
 
     void activateSession();
     void deactivateSession();
@@ -409,7 +413,9 @@ private:
     PrelaunchSplash *m_prelaunchSplash = nullptr; // treeland prelaunch splash protocol
     VirtualOutputV1 *m_virtualOutput = nullptr;
     OutputManagerV1 *m_outputManagerV1 = nullptr;
+#ifndef DISABLE_DDM
     DDMInterfaceV1 *m_ddmInterfaceV1 = nullptr;
+#endif
     ScreensaverInterfaceV1 *m_screensaverInterfaceV1 = nullptr;
 #ifdef EXT_SESSION_LOCK_V1
     WSessionLockManager *m_sessionLockManager = nullptr;
@@ -436,7 +442,9 @@ private:
     bool m_singleMetaKeyPendingPressed{ false };
 
     IMultitaskView *m_multitaskView{ nullptr };
+#ifndef DISABLE_DDM
     UserModel *m_userModel{ nullptr };
+#endif
 
     bool m_blockActivateSurface{ false };
 

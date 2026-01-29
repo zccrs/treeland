@@ -56,10 +56,12 @@ set_source_files_properties("${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop
    INCLUDE "loginddbustypes.h"
 )
 
-qt_add_dbus_interface(DDM_DBUS_SOURCES "${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.DisplayManager.xml"          DisplayManager)
-qt_add_dbus_interface(DDM_DBUS_SOURCES "${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.DisplayManager.Seat.xml"     DisplayManagerSeat)
-qt_add_dbus_interface(DDM_DBUS_SOURCES "${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.DisplayManager.Session.xml"  DisplayManagerSession)
-qt_add_dbus_interface(DDM_DBUS_SOURCES "${CMAKE_SOURCE_DIR}/misc/interfaces/org.deepin.DisplayManager.xml"               DDMDisplayManager)
+if (NOT DISABLE_DDM)
+    qt_add_dbus_interface(DDM_DBUS_SOURCES "${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.DisplayManager.xml"          DisplayManager)
+    qt_add_dbus_interface(DDM_DBUS_SOURCES "${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.DisplayManager.Seat.xml"     DisplayManagerSeat)
+    qt_add_dbus_interface(DDM_DBUS_SOURCES "${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.DisplayManager.Session.xml"  DisplayManagerSession)
+    qt_add_dbus_interface(DDM_DBUS_SOURCES "${CMAKE_SOURCE_DIR}/misc/interfaces/org.deepin.DisplayManager.xml"               DDMDisplayManager)
+endif()
 qt_add_dbus_interface(DBUS_INTERFACE   "${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.login1.Manager.xml"          Login1Manager)
 qt_add_dbus_interface(DBUS_INTERFACE   "${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.login1.Seat.xml"             Login1Seat)
 qt_add_dbus_interface(DBUS_INTERFACE   "${CMAKE_SOURCE_DIR}/misc/interfaces/org.freedesktop.login1.Session.xml"          Login1Session)
@@ -106,7 +108,7 @@ qt_add_qml_module(libtreeland
     VERSION "2.0"
 
     SOURCES
-        ${DDM_DBUS_SOURCES}
+        $<$<NOT:$<BOOL:${DISABLE_DDM}>>:${DDM_DBUS_SOURCES}>
         ${DBUS_INTERFACE}
         ${TREELAND_CONFIG}
         ${TREELAND_USER_CONFIG}

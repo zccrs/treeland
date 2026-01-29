@@ -11,7 +11,9 @@
 #include "modules/dde-shell/ddeshellmanagerinterfacev1.h"
 #include "input/inputdevice.h"
 #include "core/layersurfacecontainer.h"
+#ifndef DISABLE_DDM
 #include "greeter/usermodel.h"
+#endif
 #ifdef EXT_SESSION_LOCK_V1
 #include "wsessionlock.h"
 #include "wsessionlockmanager.h"
@@ -37,11 +39,13 @@
 #include "core/windowpicker.h"
 #include "workspace/workspace.h"
 #include "common/treelandlogging.h"
-#include "modules/ddm/ddminterfacev1.h"
 #include "treelandconfig.hpp"
 #include "treelanduserconfig.hpp"
 #include "core/treeland.h"
+#ifndef DISABLE_DDM
+#include "modules/ddm/ddminterfacev1.h"
 #include "greeter/greeterproxy.h"
+#endif
 #include "modules/screensaver/screensaverinterfacev1.h"
 #include "xsettings/settingmanager.h"
 #include "modules/shortcut/shortcutmanager.h"
@@ -1224,7 +1228,9 @@ void Helper::init(Treeland::Treeland *treeland)
 {
     m_treeland = treeland;
     auto engine = qmlEngine();
+#ifndef DISABLE_DDM
     m_userModel = engine->singletonInstance<UserModel *>("Treeland", "UserModel");
+#endif
 
     engine->setContextForObject(m_renderWindow, engine->rootContext());
     engine->setContextForObject(m_renderWindow->contentItem(), engine->rootContext());
@@ -1248,7 +1254,9 @@ void Helper::init(Treeland::Treeland *treeland)
         m_seat->detachInputDevice(device);
     });
 
+#ifndef DISABLE_DDM
     m_ddmInterfaceV1 = m_server->attach<DDMInterfaceV1>();
+#endif
 
     m_outputManager = m_server->attach<WOutputManagerV1>();
     connect(m_backend, &WBackend::outputAdded, this, &Helper::onOutputAdded);
@@ -1332,6 +1340,7 @@ void Helper::init(Treeland::Treeland *treeland)
         });
     m_personalization = m_server->attach<PersonalizationV1>();
 
+#ifndef DISABLE_DDM
     auto updateCurrentUser = [this] {
         m_config.reset(TreelandUserConfig::createByName("org.deepin.dde.treeland.user",
                                                   "org.deepin.dde.treeland",
@@ -1342,6 +1351,7 @@ void Helper::init(Treeland::Treeland *treeland)
     connect(m_userModel, &UserModel::currentUserNameChanged, this, updateCurrentUser);
 
     updateCurrentUser();
+#endif
 
     connect(m_personalization,
             &PersonalizationV1::backgroundChanged,
@@ -1431,7 +1441,9 @@ void Helper::init(Treeland::Treeland *treeland)
     xwaylandOutputManager->setFilter([this](WClient *client) { return isXWaylandClient(client); });
     // User dde does not has a real Logind session, so just pass 0 as id
     updateActiveUserSession(QStringLiteral("dde"), 0);
+#ifndef DISABLE_DDM
     connect(m_userModel, &UserModel::userLoggedIn, this, &Helper::updateActiveUserSession);
+#endif
     m_xdgDecorationManager = m_server->attach<WXdgDecorationManager>();
     connect(m_xdgDecorationManager,
             &WXdgDecorationManager::surfaceModeChanged,
@@ -1653,6 +1665,7 @@ bool Helper::beforeDisposeEvent(WSeat *seat, QWindow *, QInputEvent *event)
                 return true;
         }
 
+#ifndef DISABLE_DDM
         // Switch TTY with Ctrl + Alt + F1-F12
         if (kevent->modifiers() == (Qt::ControlModifier | Qt::AltModifier)) {
             auto key = kevent->key();
@@ -1672,6 +1685,7 @@ bool Helper::beforeDisposeEvent(WSeat *seat, QWindow *, QInputEvent *event)
                 return true;
             }
         }
+#endif
 
         if (m_captureSelector) {
             if (event->modifiers() == Qt::NoModifier && kevent->key() == Qt::Key_Escape)
@@ -2788,6 +2802,7 @@ void Helper::onPrepareForSleep(bool sleep)
     }
 }
 
+#ifndef DISABLE_DDM
 UserModel *Helper::userModel() const {
     return m_userModel;
 }
@@ -2795,6 +2810,7 @@ UserModel *Helper::userModel() const {
 DDMInterfaceV1 *Helper::ddmInterfaceV1() const {
     return m_ddmInterfaceV1;
 }
+#endif
 
 void Helper::activateSession() {
     if (!m_backend->isSessionActive())
