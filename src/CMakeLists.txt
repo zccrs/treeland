@@ -254,6 +254,7 @@ qt_add_qml_module(libtreeland
         core/qml/Animations/LaunchpadAnimation.qml
         core/qml/Animations/LayerShellAnimation.qml
         core/qml/Effects/Blur.qml
+        core/qml/Effects/Glass.qml
         core/qml/Effects/LaunchpadCover.qml
         core/qml/TaskSwitcher.qml
         core/qml/TaskWindowPreview.qml
