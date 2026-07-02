@@ -30,7 +30,7 @@ RenderBufferBlitter {
     ShaderEffect {
         id: glassShader
         anchors.fill: parent
-        source: blitter.content
+        property variant source: blitter.content
         layer.enabled: blitter.radiusEnabled || blitter.blurEnabled
         smooth: blitter.radiusEnabled || blitter.blurEnabled
         opacity: (blitter.radiusEnabled || blitter.blurEnabled) ? 0 : parent.opacity

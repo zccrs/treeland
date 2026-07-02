@@ -59,6 +59,13 @@ private Q_SLOTS:
         QVERIFY(qml.contains(QStringLiteral("property color highlightColor: Qt.rgba(1, 1, 1, 0.35)")));
         QVERIFY(qml.contains(QStringLiteral("property real highlightStrength: 0.45")));
     }
+
+    void glassShaderDeclaresSourceUniform()
+    {
+        const QString qml = readSource(QStringLiteral("src/core/qml/Effects/Glass.qml"));
+        QVERIFY2(!qml.isEmpty(), "Glass.qml must be readable");
+        QVERIFY(qml.contains(QStringLiteral("property variant source: blitter.content")));
+    }
 };
 
 QTEST_MAIN(GlassEffectTest)
