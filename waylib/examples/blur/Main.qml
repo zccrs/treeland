@@ -6,10 +6,17 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Effects
 import Waylib.Server
+import Treeland
 import Blur
 
 Item {
     id :root
+
+    property bool glassMode: true
+    property real effectRadius: 36
+    property real refractionHeight: 24
+    property real refractionAmount: 10
+    property real highlightStrength: 0.45
 
     Shortcut {
         sequences: [StandardKey.Quit]
@@ -160,6 +167,59 @@ Item {
                         }
 
                         Button {
+                            text: root.glassMode ? "Glass" : "Blur"
+                            onClicked: root.glassMode = !root.glassMode
+                        }
+
+                        Label {
+                            text: "radius " + Math.round(root.effectRadius)
+                            color: "white"
+                        }
+
+                        Slider {
+                            from: 0
+                            to: 80
+                            value: root.effectRadius
+                            onMoved: root.effectRadius = value
+                        }
+
+                        Label {
+                            text: "height " + Math.round(root.refractionHeight)
+                            color: "white"
+                        }
+
+                        Slider {
+                            from: 1
+                            to: 80
+                            value: root.refractionHeight
+                            onMoved: root.refractionHeight = value
+                        }
+
+                        Label {
+                            text: "amount " + Math.round(root.refractionAmount)
+                            color: "white"
+                        }
+
+                        Slider {
+                            from: -40
+                            to: 40
+                            value: root.refractionAmount
+                            onMoved: root.refractionAmount = value
+                        }
+
+                        Label {
+                            text: "highlight " + root.highlightStrength.toFixed(2)
+                            color: "white"
+                        }
+
+                        Slider {
+                            from: 0
+                            to: 1
+                            value: root.highlightStrength
+                            onMoved: root.highlightStrength = value
+                        }
+
+                        Button {
                             text: "Quit"
                             onClicked: {
                                 Qt.quit()
@@ -182,22 +242,48 @@ Item {
                         }
                     }
 
-                    RenderBufferBlitter {
-                        id: blitter
-                        width: 200
-                        height: 200
+                    Item {
+                        id: effectPanel
+                        width: 220
+                        height: 220
                         anchors.centerIn: parent
 
-                        MultiEffect {
-                            anchors.centerIn: parent
-                            width: blitter.width
-                            height: blitter.height
-                            source: blitter.content
-                            autoPaddingEnabled: false
-                            blurEnabled: true
-                            blur: 1.0
-                            blurMax: 64
-                            saturation: 0.2
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: root.effectRadius
+                            color: Qt.rgba(1, 1, 1, 0.08)
+                            border.color: Qt.rgba(1, 1, 1, 0.35)
+                            border.width: 1
+                        }
+
+                        Loader {
+                            anchors.fill: parent
+                            sourceComponent: root.glassMode ? glassComponent : blurComponent
+                        }
+
+                        Component {
+                            id: glassComponent
+                            Glass {
+                                radius: root.effectRadius
+                                refractionHeight: root.refractionHeight
+                                refractionAmount: root.refractionAmount
+                                highlightStrength: root.highlightStrength
+                            }
+                        }
+
+                        Component {
+                            id: blurComponent
+                            RenderBufferBlitter {
+                                MultiEffect {
+                                    anchors.fill: parent
+                                    source: parent.content
+                                    autoPaddingEnabled: false
+                                    blurEnabled: true
+                                    blur: 1.0
+                                    blurMax: 64
+                                    saturation: 0.2
+                                }
+                            }
                         }
                     }
 
@@ -216,20 +302,40 @@ Item {
             }
         }
 
-        RenderBufferBlitter {
-            id: blitter
+        Item {
+            id: globalEffectPanel
             width: 300
             height: 300
             anchors.centerIn: parent
 
-            MultiEffect {
+            Loader {
                 anchors.fill: parent
-                source: blitter.content
-                autoPaddingEnabled: false
-                blurEnabled: true
-                blur: 1.0
-                blurMax: 64
-                saturation: 0.2
+                sourceComponent: root.glassMode ? globalGlassComponent : globalBlurComponent
+            }
+
+            Component {
+                id: globalGlassComponent
+                Glass {
+                    radius: root.effectRadius
+                    refractionHeight: root.refractionHeight
+                    refractionAmount: root.refractionAmount
+                    highlightStrength: root.highlightStrength
+                }
+            }
+
+            Component {
+                id: globalBlurComponent
+                RenderBufferBlitter {
+                    MultiEffect {
+                        anchors.fill: parent
+                        source: parent.content
+                        autoPaddingEnabled: false
+                        blurEnabled: true
+                        blur: 1.0
+                        blurMax: 64
+                        saturation: 0.2
+                    }
+                }
             }
         }
     }
