@@ -290,6 +290,8 @@ qt_add_shaders(libtreeland "treeland_shaders_ng"
     FILES
         ${PROJECT_RESOURCES_DIR}/shaders/radiussmoothtexture.vert
         ${PROJECT_RESOURCES_DIR}/shaders/radiussmoothtexture.frag
+        ${PROJECT_RESOURCES_DIR}/shaders/liquidglass.vert
+        ${PROJECT_RESOURCES_DIR}/shaders/liquidglass.frag
 )
 
 qt_add_resources(libtreeland "treeland_assets"
