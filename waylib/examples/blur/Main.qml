@@ -274,6 +274,7 @@ Item {
                         Component {
                             id: blurComponent
                             RenderBufferBlitter {
+                                anchors.fill: parent
                                 MultiEffect {
                                     anchors.fill: parent
                                     source: parent.content
@@ -326,6 +327,7 @@ Item {
             Component {
                 id: globalBlurComponent
                 RenderBufferBlitter {
+                    anchors.fill: parent
                     MultiEffect {
                         anchors.fill: parent
                         source: parent.content
