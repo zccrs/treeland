@@ -172,6 +172,14 @@ Item {
                         }
 
                         Label {
+                            width: parent.width
+                            text: "Glass uses analytic rounded-rect SDF\n(no cached SDF texture)"
+                            color: "#ffffffbb"
+                            font.pointSize: 9
+                            wrapMode: Text.WordWrap
+                        }
+
+                        Label {
                             text: "radius " + Math.round(root.effectRadius)
                             color: "white"
                         }

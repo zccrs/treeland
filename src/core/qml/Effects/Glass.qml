@@ -51,7 +51,7 @@ RenderBufferBlitter {
         id: softenedGlass
         anchors.fill: parent
         visible: blitter.blurEnabled
-        layer.enabled: blitter.radiusEnabled
+        layer.enabled: blitter.radiusEnabled && blitter.blurEnabled
         smooth: blitter.radiusEnabled
         opacity: blitter.radiusEnabled ? 0 : parent.opacity
         source: glassShader
