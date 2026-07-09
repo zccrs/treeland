@@ -95,8 +95,8 @@ vec2 convexSquircle(float x)
 {
     float u = 1.0 - clamp(x, 0.0, 1.0);
     float inside = max(1.0 - pow(u, 4.0), 0.0001);
-    float height = sqrt(inside);
-    float derivative = 2.0 * pow(u, 3.0) / sqrt(inside);
+    float height = pow(inside, 0.25);
+    float derivative = pow(u, 3.0) / pow(inside, 0.75);
     return vec2(height, derivative);
 }
 
@@ -136,33 +136,11 @@ void main()
         1.0);
     float inwardDistance = max(-distance, 0.0);
 
-    vec2 edgeDistance = max(halfSize - abs(centered), vec2(0.0));
-    float xEdgeInfluence = 1.0 - smoothstep(0.0, maxSizeBezel, edgeDistance.x);
-    float yEdgeInfluence = 1.0 - smoothstep(0.0, maxSizeBezel, edgeDistance.y);
-    vec2 edgeSign = sign(centered);
-    if (abs(edgeSign.x) < 0.0001)
-        edgeSign.x = 1.0;
-    if (abs(edgeSign.y) < 0.0001)
-        edgeSign.y = 1.0;
-    if (xEdgeInfluence + yEdgeInfluence > 0.0001) {
-        normal = normalize(vec2(
-            edgeSign.x * xEdgeInfluence,
-            edgeSign.y * yEdgeInfluence));
-    }
-
-    float cornerRadius = min(ubuf.radius, min(halfSize.x, halfSize.y));
-    vec2 cornerStart = halfSize - vec2(cornerRadius);
-    vec2 cornerDelta = max(abs(centered) - cornerStart, vec2(0.0));
-    float cornerMask = cornerRadius > 0.0
-        ? smoothstep(
-            0.0,
-            max(shapeAntialiasWidth, 1.0),
-            min(cornerDelta.x, cornerDelta.y))
-        : 0.0;
-    float cornerBezel = cornerRadius > 0.0
-        ? min(maxSizeBezel, max(cornerRadius - shapeAntialiasWidth, 1.0))
-        : maxSizeBezel;
-    float bw = mix(maxSizeBezel, cornerBezel, cornerMask);
+    // Distance from the SDF boundary drives the bevel profile.  The refraction
+    // direction itself stays on the rounded-rect SDF gradient; overriding it
+    // with axis-aligned edge normals breaks the continuous displacement vector
+    // field used by liquid-dom and SVG displacement-map implementations.
+    float bw = maxSizeBezel;
     float bezelProgress = clamp(inwardDistance / bw, 0.0, 1.0);
 
     vec2 profileResult = convexSquircle(bezelProgress);
@@ -228,11 +206,15 @@ void main()
         sampleBackdrop(refractedUvBlue).b
     );
 
+    float edgeInfluence = 1.0 - smoothstep(0.0, bw, inwardDistance);
+
     // ── Environment reflection (luminance-gated) ──────────────────────
     vec2 reflectedUv = texCoord + normal * ubuf.reflectionOffset * pixelSize;
     vec3 reflectedColor = sampleBackdrop(reflectedUv).rgb;
 
-    // Glass interior = refracted colour (no tint/exposure — MultiEffect handles those)
+    // The glass interior is the refracted backdrop.  Do not fake iOS-style
+    // boundary behaviour with a second adhesion sample; the correct effect
+    // comes from the continuous SDF-driven displacement field above.
     vec3 glass = refractedColor;
 
     // Reflection only shows when reflected area is bright AND refracted area is dark
@@ -248,7 +230,6 @@ void main()
     // the original backdrop untouched — like a transparent window with
     // beveled edges.
     vec3 glassInterior = glass;
-    float edgeInfluence = 1.0 - smoothstep(0.0, bw, inwardDistance);
     // edgeSaturation is an additive boost on top of MultiEffect's global saturation
     glassInterior = applySaturation(glassInterior, 1.0 + edgeInfluence * ubuf.edgeSaturation);
 
@@ -268,7 +249,7 @@ void main()
 
     vec2 specularNormal = lightDir;
     vec2 rimReflectionUv = texCoord
-        + specularNormal * ubuf.reflectionOffset * pixelSize;
+        + normal * ubuf.reflectionOffset * pixelSize;
     vec3 rimReflectionColor = sampleBackdrop(rimReflectionUv).rgb;
     vec3 rimReflectionTint = mix(
         vec3(1.0), rimReflectionColor, ubuf.rimReflectionStrength);
@@ -301,11 +282,13 @@ void main()
     vec3 background = sampleBackdrop(texCoord).rgb;
     vec3 color = background;
     if (fillMask > 0.0) {
-        // 1. Glass interior (refracted + edge saturation boost)
-        //    Limited to the bezel edge zone; center is transparent.
-        color = mix(color, glassInterior, edgeInfluence * fillMask);
-        // 2. Coloured edge specular (refracted ↔ reflected mix) — edge only
-        color = mix(color, edgeSpecularColor, combinedSpecular * edgeInfluence * fillMask);
+        // 1. Glass interior: the whole shape composites the same refracted
+        //    surface field. The center stays visually transparent when the
+        //    source is unblurred because refractedColor equals background
+        //    over the flat interior.
+        color = mix(color, glassInterior, fillMask);
+        // 2. Coloured edge specular (refracted ↔ reflected mix)
+        color = mix(color, edgeSpecularColor, combinedSpecular * fillMask);
         // 3. White specular (additive) — rim band only
         color = color + whiteSpecular * fillMask;
         // 4. Coloured specular tint — rim band only

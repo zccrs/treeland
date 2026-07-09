@@ -135,11 +135,19 @@ Item {
                     }
 
                     Image {
+                        source: root.wallpaperSource
+                        fillMode: Image.PreserveAspectFit
+                        asynchronous: true
+                        smooth: true
+                    }
+
+                    Image {
                         id: background
                         source: root.wallpaperSource
-                        fillMode: Image.PreserveAspectCrop
+                        fillMode: Image.PreserveAspectFit
                         asynchronous: true
                         anchors.fill: parent
+                        smooth: true
                     }
 
                     Column {
@@ -351,7 +359,7 @@ Item {
         Item {
             id: effectPanel
             width: 500
-            height: 100
+            height: 300
             x: (parent.width - width) / 2
             y: (parent.height - height) / 2
 
