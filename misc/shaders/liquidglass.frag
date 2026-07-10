@@ -84,6 +84,7 @@ vec4 sampleBackdrop(vec2 coord)
     return texture(source, clamp(coord, vec2(0.001), vec2(0.999)));
 }
 
+
 // ---------------------------------------------------------------------------
 // Height profile: convex squircle (from liquid-dom)
 // Returns vec2(height, derivative) where x is bezelProgress [0..1]:
@@ -141,23 +142,23 @@ void main()
     // with axis-aligned edge normals breaks the continuous displacement vector
     // field used by liquid-dom and SVG displacement-map implementations.
     float bw = maxSizeBezel;
+
     float bezelProgress = clamp(inwardDistance / bw, 0.0, 1.0);
 
     vec2 profileResult = convexSquircle(bezelProgress);
     float profileHeight = profileResult.x * bw;
     float flatHeight = convexSquircle(1.0).x * bw;
-    // Surface is thicker at the bevel edge, flattens in the interior
+    // Surface is thicker at the bevel edge, flattens in the interior.
     float surfaceHeight = ubuf.thickness
         + (inwardDistance > bw ? flatHeight : profileHeight);
 
-    // Surface slope from analytical derivative, clamped to ~85°
+    // Surface slope from analytical derivative, clamped to ~85°.
     float surfaceDerivative = (inwardDistance > bw) ? 0.0 : profileResult.y;
     float clampedSlope = min(surfaceDerivative, 11.43); // tan(1.4835) ≈ 85°
     vec2 surfaceSlope = normal * clampedSlope;
 
     // 3D surface normal from 2D slope
     vec3 surfaceNormal = normalize(vec3(surfaceSlope, 1.0));
-
     // Shared light direction for both edge optics and specular rim.  The
     // physical view-ray refraction remains normal-based; this only modulates
     // the bezel's optical strength so internal dispersion and border highlight
@@ -183,7 +184,7 @@ void main()
         vec3(0.0, 0.0, -1.0), surfaceNormal,
         1.0 / max(baseIor - disp, 1.0001));
 
-    // Per-channel pixel displacement (zero outside the shape)
+    // Per-channel pixel displacement (zero outside the shape).
     float displaceScale = fillMask > 0.0 ? 1.0 : 0.0;
     vec2 displacementRed = refractedRayRed.xy
         / max(-refractedRayRed.z, 0.0001)
@@ -195,11 +196,11 @@ void main()
         / max(-refractedRayBlue.z, 0.0001)
         * surfaceHeight * ubuf.displacementFactor * directionalOpticalStrength * displaceScale;
 
-    vec2 refractedUvRed = texCoord + displacementRed * pixelSize;
+    vec2 refractedUvRed   = texCoord + displacementRed   * pixelSize;
     vec2 refractedUvGreen = texCoord + displacementGreen * pixelSize;
-    vec2 refractedUvBlue = texCoord + displacementBlue * pixelSize;
+    vec2 refractedUvBlue  = texCoord + displacementBlue  * pixelSize;
 
-    // Sample backdrop with refraction (liquid-dom uses blurred texture here)
+    // Sample backdrop with refraction (liquid-dom uses blurred texture here).
     vec3 refractedColor = vec3(
         sampleBackdrop(refractedUvRed).r,
         sampleBackdrop(refractedUvGreen).g,
@@ -212,9 +213,6 @@ void main()
     vec2 reflectedUv = texCoord + normal * ubuf.reflectionOffset * pixelSize;
     vec3 reflectedColor = sampleBackdrop(reflectedUv).rgb;
 
-    // The glass interior is the refracted backdrop.  Do not fake iOS-style
-    // boundary behaviour with a second adhesion sample; the correct effect
-    // comes from the continuous SDF-driven displacement field above.
     vec3 glass = refractedColor;
 
     // Reflection only shows when reflected area is bright AND refracted area is dark
@@ -223,6 +221,7 @@ void main()
     float reflectionPresence = smoothstep(0.2, 0.85, reflectedLuma);
     float refractionAcceptance = 1.0 - smoothstep(0.35, 0.85, refractedLuma);
     float reflectionBlend = reflectionPresence * refractionAcceptance;
+
     vec3 edgeSpecularColor = mix(refractedColor, reflectedColor, reflectionBlend);
 
     // ── Edge-local saturation boost (global saturation is MultiEffect's job) ──
