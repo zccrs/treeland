@@ -830,6 +830,7 @@ static void updateVKTexture(QRhi *rhi, qw_texture *handle, QSGPlainTexture *text
                                          {}, {});
     texture->setHasAlphaChannel(wlr_vk_texture_has_alpha(handle->handle()));
     texture->setTextureSize(size);
+
 }
 #endif
 

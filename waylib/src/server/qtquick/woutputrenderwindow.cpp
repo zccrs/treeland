@@ -1527,6 +1527,7 @@ static void QQuickAnimatorController_advance(QQuickAnimatorController *ac)
         W_PRIVATE_MEMBER(*ac, QQuickAnimCtrl_m_window_tag{})->update();
 }
 
+
 void WOutputRenderWindowPrivate::doRender(qw_output *needsFrameOutput,
                                           const QList<OutputHelper *> &outputs,
                                           bool forceRender, bool doCommit)
