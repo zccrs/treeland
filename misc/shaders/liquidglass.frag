@@ -40,11 +40,12 @@ layout(binding = 1) uniform sampler2D source;
 
 const float M_E = 2.718281828459045;
 
-// Superellipse signed distance (|x|^n + |y|^n - r^n) / (n·|∇|).
-float sdSuperellipse(vec2 p, float n, float r)
+// Superellipse signed distance (|x|^n + |y|^n - 1) / (n·|∇|).
+// r is hardcoded to 1 — the shape always fills the item — saving one pow().
+float sdSuperellipse(vec2 p, float n)
 {
     vec2 pa = abs(p);
-    float numerator = pow(pa.x, n) + pow(pa.y, n) - pow(r, n);
+    float numerator = pow(pa.x, n) + pow(pa.y, n) - 1.0;
     float denominator = n * sqrt(pow(pa.x, 2.0 * n - 2.0)
                                  + pow(pa.y, 2.0 * n - 2.0)) + 1e-5;
     return numerator / denominator;
@@ -75,7 +76,7 @@ vec4 sampleBackdrop(vec2 coord)
 void main()
 {
     vec2 p = (texCoord - vec2(0.5)) * 2.0;
-    float dist = -sdSuperellipse(p, ubuf.powerFactor, 1.0);
+    float dist = -sdSuperellipse(p, ubuf.powerFactor);
 
     // Anti-aliased shape edge: smoothstep over ~1 pixel using screen-space
     // derivatives of the SDF.  Replaces the hard binary cut that caused jaggies.
@@ -93,12 +94,11 @@ void main()
     float s = sign(fv) * pow(abs(fv), ubuf.fPower);
     vec2 coord = (p * s) * 0.5 + vec2(0.5);
 
-    // Interior anti-aliasing: only where refraction deviates from the
-    // identity mapping (s ≠ 1) does the backdrop get stretched/compressed
-    // and need a multi-tap blend.  |s-1| is the per-axis scale deviation,
-    // so the centre (s≈1, identity) gets zero blur and stays sharp while
-    // edges (s→0 or negative, severe inversion) get the most.  fwidth
-    // gives the screen-space texel size.
+    // Interior anti-aliasing: 5-tap cross blend.  |s-1| is the refraction
+    // scale deviation from identity (s=1 → no stretch → blurOff=0 → all
+    // taps collapse to centre → sharp).  fwidth gives screen-space texel
+    // size.  No per-pixel branch — divergent texture fetch counts in a
+    // 2×2 quad break determinism on some drivers.
     float texelAA = fwidth(texCoord.x);
     vec2 blurOff = vec2(texelAA) * abs(s - 1.0) * 1.5;
     vec4 c0 = sampleBackdrop(coord);
@@ -107,13 +107,18 @@ void main()
     vec4 c3 = sampleBackdrop(coord + vec2(0.0, blurOff.y));
     vec4 c4 = sampleBackdrop(coord - vec2(0.0, blurOff.y));
     vec4 color = (c0 + c1 + c2 + c3 + c4) * 0.2;
-    color.rgb += vec3(rand(gl_FragCoord.xy) - 0.5) * ubuf.grainAmount;
+    if (ubuf.grainAmount > 1e-4)
+        color.rgb += vec3(rand(gl_FragCoord.xy) - 0.5) * ubuf.grainAmount;
 
-    float glowStep = (abs(ubuf.glowEdge1 - ubuf.glowEdge0) < 1e-5)
-        ? 0.0
-        : smoothstep(ubuf.glowEdge0, ubuf.glowEdge1, dist);
-    float mul = Glow(texCoord) * ubuf.glowWeight * glowStep + 1.0 + ubuf.glowBias;
-    color.rgb *= mul;
+    // Uniform-gated glow: skip the atan/sin/smoothstep ALU when the whole
+    // draw has glow disabled (glowWeight ≈ 0 and glowBias ≈ 0).
+    if (abs(ubuf.glowWeight) > 1e-4 || abs(ubuf.glowBias) > 1e-4) {
+        float glowStep = (abs(ubuf.glowEdge1 - ubuf.glowEdge0) < 1e-5)
+            ? 0.0
+            : smoothstep(ubuf.glowEdge0, ubuf.glowEdge1, dist);
+        float mul = Glow(texCoord) * ubuf.glowWeight * glowStep + 1.0 + ubuf.glowBias;
+        color.rgb *= mul;
+    }
 
     float alpha = shapeAlpha * ubuf.qt_Opacity;
     fragColor = vec4(clamp(color.rgb, 0.0, 1.0) * alpha, alpha);
