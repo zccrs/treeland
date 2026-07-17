@@ -54,3 +54,5 @@ obj-*-linux-gnu/
 # ai
 .cursor
 .specstory
+
+.worktrees/
