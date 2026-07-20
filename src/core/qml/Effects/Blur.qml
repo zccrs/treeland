@@ -18,6 +18,12 @@ RenderBufferBlitter {
     property real blurAmount: Helper.config.blurAmount
     property real multiplier: Helper.config.blurMultiplier
     property real brightness: Helper.config.glassBrightness
+    property real contrast: Helper.config.glassContrast
+    property real saturation: Helper.config.glassSaturation
+    property real colorization: Helper.config.glassColorization
+    property bool highlightEnabled: Helper.config.glassHighlightEnabled
+    property real glassSpecular: Helper.config.glassSpecular
+    property real glassTint: Helper.config.glassTint
     property bool glassEnabled: Helper.config.glassEnabled
 
     z: parent.z ? parent.z - 1 : -1
@@ -36,26 +42,23 @@ RenderBufferBlitter {
         GlassEffect {
             anchors.fill: parent
             source: blitter.content
+            radius: blitter.radius
             blurEnabled: blitter.blurEnabled
             blurMax: blitter.blurMax
             blurAmount: blitter.blurAmount
             blurMultiplier: blitter.multiplier
+            bezelWidth: Helper.config.glassBezel
+            thickness: Helper.config.glassThickness
+            ior: Helper.config.glassIor
+            specular: blitter.glassSpecular
+            tint: blitter.glassTint
+            dispersionWidth: Helper.config.glassDispersionWidth
+            dispersionBlend: Helper.config.glassDispersionBlend
             brightness: blitter.brightness
-            contrast: -0.12
-            saturation: 0.4
-            colorization: 0.12
-
-            powerFactor: Helper.config.glassPowerFactor
-            fPower: Helper.config.glassFPower
-            a: Helper.config.glassA
-            b: Helper.config.glassB
-            c: Helper.config.glassC
-            d: Helper.config.glassD
-            noise: Helper.config.glassNoise
-            glowWeight: Helper.config.glassGlowWeight
-            glowBias: Helper.config.glassGlowBias
-            glowEdge0: Helper.config.glassGlowEdge0
-            glowEdge1: Helper.config.glassGlowEdge1
+            contrast: blitter.contrast
+            dispersionPx: Helper.config.glassDispersionPx
+            colorization: blitter.colorization
+            highlightEnabled: blitter.highlightEnabled
         }
     }
 

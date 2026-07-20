@@ -81,6 +81,6 @@ set_target_properties(test_effect_glass PROPERTIES
 
 add_test(NAME test_effect_glass COMMAND test_effect_glass)
 set_tests_properties(test_effect_glass PROPERTIES
-    ENVIRONMENT "WLR_BACKENDS=headless;QT_QML_IMPORT_PATH=${PROJECT_BINARY_DIR}/waylib/src/server"
+    ENVIRONMENT "WLR_BACKENDS=headless;LP_NUM_THREADS=1;QT_QML_IMPORT_PATH=${PROJECT_BINARY_DIR}/waylib/src/server"
     TIMEOUT 60
 )

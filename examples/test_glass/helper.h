@@ -29,10 +29,16 @@ class GlassConfig : public QObject {
     Q_PROPERTY(qreal glassThickness READ glassThickness WRITE setGlassThickness NOTIFY glassThicknessChanged)
     Q_PROPERTY(qreal glassDisplacementFactor READ glassDisplacementFactor WRITE setGlassDisplacementFactor NOTIFY glassDisplacementFactorChanged)
     Q_PROPERTY(qreal glassIor READ glassIor WRITE setGlassIor NOTIFY glassIorChanged)
-    Q_PROPERTY(qreal glassDispersion READ glassDispersion WRITE setGlassDispersion NOTIFY glassDispersionChanged)
+    Q_PROPERTY(qreal glassSpecular READ glassSpecular WRITE setGlassSpecular NOTIFY glassSpecularChanged)
+    Q_PROPERTY(qreal glassTint READ glassTint WRITE setGlassTint NOTIFY glassTintChanged)
+    Q_PROPERTY(qreal glassDispersionPx READ glassDispersionPx WRITE setGlassDispersionPx NOTIFY glassDispersionPxChanged)
+    Q_PROPERTY(qreal glassDispersionWidth READ glassDispersionWidth WRITE setGlassDispersionFalloff NOTIFY glassDispersionWidthChanged)
+    Q_PROPERTY(qreal glassDispersionBlend READ glassDispersionBlend WRITE setGlassDispersionBlend NOTIFY glassDispersionBlendChanged)
     Q_PROPERTY(qreal glassBrightness READ glassBrightness WRITE setGlassBrightness NOTIFY glassBrightnessChanged)
+    Q_PROPERTY(qreal glassContrast READ glassContrast WRITE setGlassContrast NOTIFY glassContrastChanged)
+    Q_PROPERTY(qreal glassSaturation READ glassSaturation WRITE setGlassSaturation NOTIFY glassSaturationChanged)
+    Q_PROPERTY(qreal glassColorization READ glassColorization WRITE setGlassColorization NOTIFY glassColorizationChanged)
     Q_PROPERTY(qreal glassEdgeSaturation READ glassEdgeSaturation WRITE setGlassEdgeSaturation NOTIFY glassEdgeSaturationChanged)
-    Q_PROPERTY(qreal glassLightAngle READ glassLightAngle WRITE setGlassLightAngle NOTIFY glassLightAngleChanged)
     Q_PROPERTY(qreal glassReflectionOffset READ glassReflectionOffset WRITE setGlassReflectionOffset NOTIFY glassReflectionOffsetChanged)
     Q_PROPERTY(bool glassHighlightEnabled READ glassHighlightEnabled WRITE setGlassHighlightEnabled NOTIFY glassHighlightEnabledChanged)
 
@@ -57,14 +63,26 @@ public:
     void setGlassDisplacementFactor(qreal v) { if (m_glassDisplacementFactor != v) { m_glassDisplacementFactor = v; emit glassDisplacementFactorChanged(); } }
     qreal glassIor() const { return m_glassIor; }
     void setGlassIor(qreal v) { if (m_glassIor != v) { m_glassIor = v; emit glassIorChanged(); } }
-    qreal glassDispersion() const { return m_glassDispersion; }
-    void setGlassDispersion(qreal v) { if (m_glassDispersion != v) { m_glassDispersion = v; emit glassDispersionChanged(); } }
+    qreal glassSpecular() const { return m_glassSpecular; }
+    void setGlassSpecular(qreal v) { if (m_glassSpecular != v) { m_glassSpecular = v; emit glassSpecularChanged(); } }
+    qreal glassTint() const { return m_glassTint; }
+    void setGlassTint(qreal v) { if (m_glassTint != v) { m_glassTint = v; emit glassTintChanged(); } }
+    qreal glassDispersionPx() const { return m_glassDispersionPx; }
+    void setGlassDispersionPx(qreal v) { if (m_glassDispersionPx != v) { m_glassDispersionPx = v; emit glassDispersionPxChanged(); } }
+    qreal glassDispersionWidth() const { return m_glassDispersionWidth; }
+    void setGlassDispersionFalloff(qreal v) { if (m_glassDispersionWidth != v) { m_glassDispersionWidth = v; emit glassDispersionWidthChanged(); } }
+    qreal glassDispersionBlend() const { return m_glassDispersionBlend; }
+    void setGlassDispersionBlend(qreal v) { if (m_glassDispersionBlend != v) { m_glassDispersionBlend = v; emit glassDispersionBlendChanged(); } }
     qreal glassBrightness() const { return m_glassBrightness; }
     void setGlassBrightness(qreal v) { if (m_glassBrightness != v) { m_glassBrightness = v; emit glassBrightnessChanged(); } }
+    qreal glassContrast() const { return m_glassContrast; }
+    void setGlassContrast(qreal v) { if (m_glassContrast != v) { m_glassContrast = v; emit glassContrastChanged(); } }
+    qreal glassSaturation() const { return m_glassSaturation; }
+    void setGlassSaturation(qreal v) { if (m_glassSaturation != v) { m_glassSaturation = v; emit glassSaturationChanged(); } }
+    qreal glassColorization() const { return m_glassColorization; }
+    void setGlassColorization(qreal v) { if (m_glassColorization != v) { m_glassColorization = v; emit glassColorizationChanged(); } }
     qreal glassEdgeSaturation() const { return m_glassEdgeSaturation; }
     void setGlassEdgeSaturation(qreal v) { if (m_glassEdgeSaturation != v) { m_glassEdgeSaturation = v; emit glassEdgeSaturationChanged(); } }
-    qreal glassLightAngle() const { return m_glassLightAngle; }
-    void setGlassLightAngle(qreal v) { if (m_glassLightAngle != v) { m_glassLightAngle = v; emit glassLightAngleChanged(); } }
     qreal glassReflectionOffset() const { return m_glassReflectionOffset; }
     void setGlassReflectionOffset(qreal v) { if (m_glassReflectionOffset != v) { m_glassReflectionOffset = v; emit glassReflectionOffsetChanged(); } }
     bool glassHighlightEnabled() const { return m_glassHighlightEnabled; }
@@ -79,10 +97,16 @@ Q_SIGNALS:
     void glassThicknessChanged();
     void glassDisplacementFactorChanged();
     void glassIorChanged();
-    void glassDispersionChanged();
+    void glassSpecularChanged();
+    void glassTintChanged();
+    void glassDispersionPxChanged();
+    void glassDispersionWidthChanged();
+    void glassDispersionBlendChanged();
     void glassBrightnessChanged();
+    void glassContrastChanged();
+    void glassSaturationChanged();
+    void glassColorizationChanged();
     void glassEdgeSaturationChanged();
-    void glassLightAngleChanged();
     void glassReflectionOffsetChanged();
     void glassHighlightEnabledChanged();
 
@@ -91,16 +115,22 @@ private:
     int m_blurStrength = 20;
     qreal m_blurAmount = 1.0;
     qreal m_blurMultiplier = 0.0;
-    qreal m_glassBezel = 30;
+    qreal m_glassBezel = 60;
     qreal m_glassThickness = 50;
     qreal m_glassDisplacementFactor = 1.0;
-    qreal m_glassIor = 1.2;
-    qreal m_glassDispersion = 0.0;
+    qreal m_glassIor = 3.0;
+    qreal m_glassSpecular = 0.55;
+    qreal m_glassTint = 0.08;
+    qreal m_glassDispersionPx = 40.0;
+    qreal m_glassDispersionWidth = 15.0;
+    qreal m_glassDispersionBlend = 1.0;
     qreal m_glassBrightness = 0.0;
+    qreal m_glassContrast = 0.0;
+    qreal m_glassSaturation = 0.0;
+    qreal m_glassColorization = 0.0;
     qreal m_glassEdgeSaturation = 0.4;
-    qreal m_glassLightAngle = -127;
     qreal m_glassReflectionOffset = 12.0;
-    bool m_glassHighlightEnabled = false;
+    bool m_glassHighlightEnabled = true;
 };
 
 WAYLIB_SERVER_BEGIN_NAMESPACE

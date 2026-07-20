@@ -15,23 +15,28 @@ Item {
     readonly property url wallpaperSource: Helper.wallpaperSource
 
     property bool glassMode: true
-    property bool glassBlurEnabled: true
+    property real effectWidth: 300
+    property real effectHeight: 200
+    property real effectRadius: 60
+    property real glassThickness: 50
+    property real glassBezelWidth: 60
+    property real glassIor: 3.0
+    property bool glassBlurEnabled: false
     property int glassBlurMax: 36
-    property real glassPowerFactor: 3.0
-    property real glassFPower: 1.0
-    property real glassA: 0.7
-    property real glassB: 2.3
-    property real glassC: 5.2
-    property real glassD: 6.9
-    property real glassNoise: 0.06
-    property real glassGlowWeight: 0.25
-    property real glassGlowBias: 0.0
-    property real glassGlowEdge0: 0.5
-    property real glassGlowEdge1: -0.5
-    property real glassBrightness: 0.05
-    property real glassContrast: -0.12
-    property real glassSaturation: 0.4
-    property real glassColorization: 0.12
+    property real glassBlurAmount: 1.0
+    property real glassBlurMultiplier: 0.0
+    property real glassSpecular: 0.55
+    property real glassTint: 0.08
+    property real glassDispersionPx: 40.0
+    property real glassDispersionWidth: 15.0
+    property real glassDispersionBlend: 1.0
+    property bool glassHighlightEnabled: true
+    property real glassEdgeSaturation: 0.4
+    property real glassReflectionOffset: 12.0
+    property real glassBrightness: 0.0
+    property real glassContrast: 0.0
+    property real glassSaturation: 0.0
+    property real glassColorization: 0.0
     property bool advancedExpanded: false
 
     Shortcut {
@@ -176,73 +181,126 @@ Item {
                             }
                         }
 
-                        // ── Common sliders (always visible, single row) ──
-                        Row {
-                            spacing: 20
+                        GridLayout {
+                            columns: 2
+                            columnSpacing: 14
+                            rowSpacing: 4
 
                             Column {
                                 spacing: 2
-                                Label { text: "power " + root.glassPowerFactor.toFixed(2); color: "white" }
-                                Slider { from: 1.001; to: 6.0; value: root.glassPowerFactor; onMoved: root.glassPowerFactor = value }
+                                Label { text: "radius " + Math.round(root.effectRadius); color: "white" }
+                                Slider { from: 4; to: 120; value: root.effectRadius; onMoved: root.effectRadius = value }
                             }
                             Column {
                                 spacing: 2
                                 Label { text: "blur max " + root.glassBlurMax; color: "white" }
-                                Slider { from: 0; to: 96; stepSize: 1; value: root.glassBlurMax; onMoved: root.glassBlurMax = value }
+                                Slider { from: 0; to: 128; stepSize: 1; value: root.glassBlurMax; onMoved: root.glassBlurMax = value }
                             }
                         }
 
                         Button {
-                            text: root.advancedExpanded ? "▼ Advanced" : "▶ Advanced"
+                            text: (root.advancedExpanded ? "▼" : "▶") + " Advanced"
                             onClicked: root.advancedExpanded = !root.advancedExpanded
                         }
 
-                        // ── Advanced sliders (collapsible, multi-column) ──
-                        Row {
-                            spacing: 20
+                        GridLayout {
                             visible: root.advancedExpanded
+                            columns: 4
+                            columnSpacing: 14
+                            rowSpacing: 4
 
-                            // Column A: refraction curve
                             Column {
                                 spacing: 2
-                                Label { text: "fPower " + root.glassFPower.toFixed(2); color: "white" }
-                                Slider { from: -1.5; to: 6.0; value: root.glassFPower; onMoved: root.glassFPower = value }
-                                Label { text: "a " + root.glassA.toFixed(2); color: "white" }
-                                Slider { from: 0; to: 5; value: root.glassA; onMoved: root.glassA = value }
-                                Label { text: "b " + root.glassB.toFixed(2); color: "white" }
-                                Slider { from: 0; to: 6; value: root.glassB; onMoved: root.glassB = value }
-                                Label { text: "c " + root.glassC.toFixed(2); color: "white" }
-                                Slider { from: 0; to: 6; value: root.glassC; onMoved: root.glassC = value }
-                                Label { text: "d " + root.glassD.toFixed(2); color: "white" }
-                                Slider { from: 0; to: 10; value: root.glassD; onMoved: root.glassD = value }
+                                Label { text: "width " + Math.round(root.effectWidth); color: "white" }
+                                Slider { from: 200; to: 700; value: root.effectWidth; onMoved: root.effectWidth = value }
                             }
-
-                            // Column B: glow & noise
                             Column {
                                 spacing: 2
-                                Label { text: "noise " + root.glassNoise.toFixed(3); color: "white" }
-                                Slider { from: 0; to: 0.3; value: root.glassNoise; onMoved: root.glassNoise = value }
-                                Label { text: "glow wt " + root.glassGlowWeight.toFixed(2); color: "white" }
-                                Slider { from: -1; to: 1; value: root.glassGlowWeight; onMoved: root.glassGlowWeight = value }
-                                Label { text: "glow bias " + root.glassGlowBias.toFixed(2); color: "white" }
-                                Slider { from: -1; to: 1; value: root.glassGlowBias; onMoved: root.glassGlowBias = value }
-                                Label { text: "glow e0 " + root.glassGlowEdge0.toFixed(2); color: "white" }
-                                Slider { from: -1; to: 1; value: root.glassGlowEdge0; onMoved: root.glassGlowEdge0 = value }
-                                Label { text: "glow e1 " + root.glassGlowEdge1.toFixed(2); color: "white" }
-                                Slider { from: -1; to: 1; value: root.glassGlowEdge1; onMoved: root.glassGlowEdge1 = value }
+                                Label { text: "height " + Math.round(root.effectHeight); color: "white" }
+                                Slider { from: 200; to: 800; value: root.effectHeight; onMoved: root.effectHeight = value }
                             }
-
-                            // Column C: colour grading (MultiEffect)
+                            Column {
+                                spacing: 2
+                                Label { text: "thickness " + Math.round(root.glassThickness); color: "white" }
+                                Slider { from: 10; to: 200; value: root.glassThickness; onMoved: root.glassThickness = value }
+                            }
+                            Column {
+                                spacing: 2
+                                Label { text: "bezel " + Math.round(root.glassBezelWidth); color: "white" }
+                                Slider { from: 2; to: 60; value: root.glassBezelWidth; onMoved: root.glassBezelWidth = value }
+                            }
+                            Column {
+                                spacing: 2
+                                Label { text: "ior " + root.glassIor.toFixed(2); color: "white" }
+                                Slider { from: 1.0; to: 3.0; stepSize: 0.05; value: root.glassIor; onMoved: root.glassIor = value }
+                            }
+                            Column {
+                                spacing: 2
+                                Label { text: "blurAmount " + root.glassBlurAmount.toFixed(2); color: "white" }
+                                Slider { from: 0; to: 1; stepSize: 0.05; value: root.glassBlurAmount; onMoved: root.glassBlurAmount = value }
+                            }
+                            Column {
+                                spacing: 2
+                                Label { text: "blurMultiplier " + root.glassBlurMultiplier.toFixed(2); color: "white" }
+                                Slider { from: 0; to: 4; stepSize: 0.05; value: root.glassBlurMultiplier; onMoved: root.glassBlurMultiplier = value }
+                            }
+                            Column {
+                                spacing: 2
+                                Label { text: "specular " + root.glassSpecular.toFixed(2); color: "white" }
+                                Slider { from: 0; to: 1; stepSize: 0.05; value: root.glassSpecular; onMoved: root.glassSpecular = value }
+                            }
+                            Column {
+                                spacing: 2
+                                Label { text: "tint " + Math.round(root.glassTint * 100) + "%"; color: "white" }
+                                Slider { from: 0; to: 0.4; stepSize: 0.01; value: root.glassTint; onMoved: root.glassTint = value }
+                            }
+                            Column {
+                                spacing: 2
+                                Label { text: "dispersion px " + Math.round(root.glassDispersionPx); color: "white" }
+                                Slider { from: 0; to: 100; stepSize: 1; value: root.glassDispersionPx; onMoved: root.glassDispersionPx = value }
+                            }
+                            Column {
+                                spacing: 2
+                                Label { text: "dispersion width " + root.glassDispersionWidth.toFixed(1) + "px"; color: "white" }
+                                Slider { from: 0; to: 100; stepSize: 1; value: root.glassDispersionWidth; onMoved: root.glassDispersionWidth = value }
+                            }
+                            Column {
+                                spacing: 2
+                                Label { text: "dispersion blend " + Math.round(root.glassDispersionBlend * 100) + "%"; color: "white" }
+                                Slider { from: 0; to: 1; stepSize: 0.05; value: root.glassDispersionBlend; onMoved: root.glassDispersionBlend = value }
+                            }
+                            Column {
+                                spacing: 2
+                            }
+                            Column {
+                                spacing: 2
+                                Label { text: "edge saturation " + root.glassEdgeSaturation.toFixed(2); color: "white" }
+                                Slider { from: 0; to: 2; stepSize: 0.05; value: root.glassEdgeSaturation; onMoved: root.glassEdgeSaturation = value }
+                            }
+                            Column {
+                                spacing: 2
+                                Label { text: "reflection offset " + root.glassReflectionOffset.toFixed(1); color: "white" }
+                                Slider { from: 0; to: 60; stepSize: 1; value: root.glassReflectionOffset; onMoved: root.glassReflectionOffset = value }
+                            }
                             Column {
                                 spacing: 2
                                 Label { text: "brightness " + root.glassBrightness.toFixed(2); color: "white" }
-                                Slider { from: -1; to: 1; value: root.glassBrightness; onMoved: root.glassBrightness = value }
+                                Slider { from: -1; to: 1; stepSize: 0.05; value: root.glassBrightness; onMoved: root.glassBrightness = value }
+                            }
+                            Column {
+                                spacing: 2
                                 Label { text: "contrast " + root.glassContrast.toFixed(2); color: "white" }
-                                Slider { from: -1; to: 1; value: root.glassContrast; onMoved: root.glassContrast = value }
+                                Slider { from: -1; to: 1; stepSize: 0.05; value: root.glassContrast; onMoved: root.glassContrast = value }
+                            }
+                            Column {
+                                spacing: 2
                                 Label { text: "saturation " + root.glassSaturation.toFixed(2); color: "white" }
-                                Slider { from: -1; to: 1; value: root.glassSaturation; onMoved: root.glassSaturation = value }
+                                Slider { from: -1; to: 1; stepSize: 0.05; value: root.glassSaturation; onMoved: root.glassSaturation = value }
+                            }
+                            Column {
+                                spacing: 2
                                 Label { text: "colorization " + root.glassColorization.toFixed(2); color: "white" }
-                                Slider { from: 0; to: 1; value: root.glassColorization; onMoved: root.glassColorization = value }
+                                Slider { from: 0; to: 1; stepSize: 0.05; value: root.glassColorization; onMoved: root.glassColorization = value }
                             }
                         }
                     }
@@ -332,8 +390,8 @@ Item {
 
         Item {
             id: effectPanel
-            width: 250
-            height: 250
+            width: root.effectWidth
+            height: root.effectHeight
             x: (parent.width - width) / 2
             y: (parent.height - height) / 2
 
@@ -361,24 +419,25 @@ Item {
                     GlassEffect {
                         anchors.fill: parent
                         source: blitter.content
+                        radius: root.effectRadius
                         blurEnabled: root.glassBlurEnabled
                         blurMax: root.glassBlurMax
+                        blurAmount: root.glassBlurAmount
+                        blurMultiplier: root.glassBlurMultiplier
+                        bezelWidth: root.glassBezelWidth
+                        thickness: root.glassThickness
+                        ior: root.glassIor
+                        specular: root.glassSpecular
+                        tint: root.glassTint
+                        dispersionPx: root.glassDispersionPx
+                        dispersionWidth: root.glassDispersionWidth
+                        dispersionBlend: root.glassDispersionBlend
+                        highlightEnabled: root.glassHighlightEnabled
+                        smooth: true
                         brightness: root.glassBrightness
                         contrast: root.glassContrast
                         saturation: root.glassSaturation
                         colorization: root.glassColorization
-                        powerFactor: root.glassPowerFactor
-                        fPower: root.glassFPower
-                        a: root.glassA
-                        b: root.glassB
-                        c: root.glassC
-                        d: root.glassD
-                        noise: root.glassNoise
-                        glowWeight: root.glassGlowWeight
-                        glowBias: root.glassGlowBias
-                        glowEdge0: root.glassGlowEdge0
-                        glowEdge1: root.glassGlowEdge1
-                        smooth: true
                     }
                 }
             }
