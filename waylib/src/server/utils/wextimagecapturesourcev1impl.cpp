@@ -34,10 +34,13 @@ struct WBufferUnlocker {
     void operator()(wlr_buffer *buf) const { if (buf) wlr_buffer_unlock(buf); }
 };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
 static WExtImageCaptureSourceV1Impl *getImpl(wlr_ext_image_capture_source_v1 *source) {
     return reinterpret_cast<WExtImageCaptureSourceV1Impl*>(
         reinterpret_cast<char*>(source) - offsetof(WExtImageCaptureSourceV1Impl, m_source));
 }
+#pragma GCC diagnostic pop
 
 void WExtImageCaptureSourceV1Impl::impl_start(wlr_ext_image_capture_source_v1 *source, bool with_cursors) {
     getImpl(source)->start(with_cursors);
